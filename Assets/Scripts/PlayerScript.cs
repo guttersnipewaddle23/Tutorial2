@@ -11,13 +11,34 @@ public class PlayerScript : MonoBehaviour
 
     public Text score;
 
+    public Text win;
+
+    public Text lose;
+
+    public Text lives;  
+    
     private int scoreValue = 0;
 
-        // Start is called before the first frame update
+    private int livesValue = 3;
+
+    public AudioClip musicClipOne;
+
+    public AudioClip musicClipTwo;
+
+    public AudioClip musicClipThree;
+
+    public AudioSource musicSource;
+
+    // Start is called before the first frame update
     void Start()
     {
         rd2d = GetComponent<Rigidbody2D>();
         score.text = scoreValue.ToString();
+        lives.text = livesValue.ToString();
+        win.text = " ";
+        lose.text = " ";
+        musicSource.clip = musicClipOne;
+        musicSource.Play();
     }
 
     // Update is called once per frame
@@ -26,17 +47,14 @@ public class PlayerScript : MonoBehaviour
         float hozMovement = Input.GetAxis("Horizontal");
         float vertMovement = Input.GetAxis("Vertical");
         rd2d.AddForce(new Vector2(hozMovement * speed, vertMovement * speed));
-    }
 
-    void Update()
-    {
-        
-            if (Input.GetKeyDown(KeyCode.Escape))
-            {
-                Application.Quit();
-            }
-     
+        if (Input.GetKeyDown("escape"))
+        {
+            Application.Quit();
+        }
     }
+    
+    
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
@@ -45,8 +63,42 @@ public class PlayerScript : MonoBehaviour
             scoreValue += 1;
             score.text = scoreValue.ToString();
             Destroy(collision.collider.gameObject);
+                      
+            if (scoreValue == 4)
+            {
+                transform.position = new Vector2(40f,1f);
+                livesValue = 3;
+                lives.text = livesValue.ToString();
+             
+            }          
+
+            if (scoreValue == 8)
+            {
+                win.text = "CONGRATULATIONS YOU WIN! Game Created by: Nicholas Kaczor";
+                Destroy(this);
+                musicSource.Stop();
+                musicSource.clip = musicClipTwo;
+                musicSource.Play();
+            }
+                       
         }
 
+        if (collision.collider.tag == "Enemy")
+        {
+            livesValue -= 1;
+            lives.text = livesValue.ToString();
+            Destroy(collision.collider.gameObject);
+
+            if (livesValue == 0)
+            {
+                lose.text = "SORRY TRY AGAIN. YOU LOSE!";
+                musicSource.Stop();
+                musicSource.clip = musicClipThree;
+                musicSource.Play();
+                Destroy(this);
+
+            }
+        } 
     }
 
     private void OnCollisionStay2D(Collision2D collision)
